@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GoFiber Weather App</title>
+        <link rel="shortcut icon" type="image/png" href="static/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="static/css/styles.css" />
+        <script defer src="static/vendored/alpinejs/resize.min.js"></script>
+        <script defer src="static/vendored/alpinejs/3.x.x.min.js"></script>
+        <script src="static/vendored/htmx/2.0.4.min.js"></script>
+        <script src="static/vendored/htmx/preload@2.1.0.min.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
+              rel="stylesheet" />
+    </head>
+    <body hx-ext="preload" class="bg-gray-900 font-[Outfit,sans-serif]">
+        {{ template "components/base" . }}
+        <script src="static/js/main.js"></script>
+    </body>
+</html>

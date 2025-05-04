@@ -1,0 +1,47 @@
+info:
+  contact: {}
+paths:
+  /api/v1/search/{city}:
+    get:
+      consumes:
+      - application/json
+      description: Get list of cities by given City name.
+      parameters:
+      - description: City Name
+        in: path
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+  /api/v1/weather/{city}/{country}/{lat}/{lon}:
+    get:
+      consumes:
+      - application/json
+      description: Get data of location by given Lat & Lon.
+      parameters:
+      - description: City
+        in: path
+        name: city
+        required: true
+        type: string
+      - description: Country
+        in: path
+        name: country
+        required: true
+        type: string
+      - description: Latitude
+        in: path
+        name: lat
+        required: true
+        type: string
+      - description: Longitude
+        in: path
+        name: lon
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+swagger: "2.0"

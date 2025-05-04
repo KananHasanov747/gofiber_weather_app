@@ -1,0 +1,112 @@
+<div x-data="{ data: {} }"
+     x-init="$store.data = {{ .data }}; data = $store.data; $watch('$store.data', value => data = value);"
+     class="flex flex-col min-h-dvh text-gray-300">
+    <div class="px-6 pt-4">
+        <div class="flex flex-col items-center">
+            <span x-text="data.city" class="text-sm"></span>
+            <span x-text="data.country" class="text-lg"></span>
+        </div>
+        <div class="flex items-end justify-between mt-4">
+            <div>
+                <img src="static/assets/icons/cloudy.svg"
+                     alt="cloudy icon"
+                     class="w-8 h-8" />
+                <div class="w-12 text-base/4.5">Mostly cloudy</div>
+            </div>
+            <div class="text-8xl font-normal">34°</div>
+        </div>
+    </div>
+    <div class="flex flex-col grow" x-data="tabs" x-init="">
+        <div class="relative overflow-x-hidden grow my-2">
+            <div class="absolute top-0 w-full h-12 bg-linear-to-b from-gray-900 to-transparent z-10"></div>
+            <div class="absolute bottom-0 w-full h-12 bg-linear-to-t from-gray-900 to-transparent z-10"></div>
+            <div class="absolute w-full h-full transition-transform duration-300"
+                 :style="`transform: translateX(-${tabSelected * 100}%)`">
+                <div class="absolute w-full h-full grid grid-cols-2 gap-x-6 px-6 pt-16">
+                    <template x-for=" ({title, icon, value}, index) in [ { title: 'Feel Like', icon: 'static/assets/icons/thermometer-glass.svg', value: '34°', }, { title: 'Wind', icon: 'static/assets/icons/dust-wind.svg', value: '34 km/h', }, { title: 'Precipitation', icon: 'static/assets/icons/rain.svg', value: '20%', }, { title: 'UV index', icon: 'static/assets/icons/uv-index.svg', value: '2', }, ] ">
+                        <div class="flex">
+                            <div class="w-12 h-12 p-1 rounded-md border-1 border-gray-600">
+                                <img :src="icon" class="w-10 h-10" />
+                            </div>
+                            <div class="flex flex-col ml-3">
+                                <span x-text="title"></span>
+                                <span x-text="value"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="absolute w-full h-full px-6 py-8 overflow-y-scroll"
+                     style="transform: translateX(100%)">
+                    <template x-for="index in 24">
+                        <div>
+                            <div x-show="index !== 1" class="w-full h-[1px] bg-gray-600"></div>
+                            <div class="grid grid-cols-3 items-center py-4">
+                                <div x-text="`${index}:00`"></div>
+                                <img src="static/assets/icons/cloudy.svg"
+                                     alt="cloudy icon"
+                                     class="w-12 h-12 mx-auto" />
+                                <div class="ml-auto">34°</div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="absolute w-full h-full px-6 py-12 overflow-y-scroll"
+                     style="transform: translateX(200%)">
+                    <template x-for="(value, index) in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat', 'Sun']">
+                        <div>
+                            <div x-show="index !== 0" class="w-full h-[1px] bg-gray-600"></div>
+                            <div class="grid grid-cols-3 items-center py-4">
+                                <div x-text="value"></div>
+                                <img src="static/assets/icons/cloudy.svg"
+                                     alt="cloudy icon"
+                                     class="w-12 h-12 mx-auto" />
+                                <div class="ml-auto">
+                                    34°
+                                    <span class="mx-2">-</span>
+                                    24°
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <div x-data="{ tabsWidth: 0 }"
+             x-resize="tabsWidth = $el.clientWidth"
+             class="relative p-6 pt-0">
+            <div class="relative w-min overflow-x-hidden">
+                <div x-ref="tabSections" class="flex gap-4">
+                    <template x-for="(value, index) in ['Now', 'Hourly', 'Daily']">
+                        <button @click="tabSectionClicked(index)"
+                                x-init="if(index === 0) { $nextTick(() => tabRepositionMarker($el)) }"
+                                class="relative flex flex-col items-start">
+                            <div class="h-0.5"></div>
+                            <div x-text="value"
+                                 class="pl-3 transition-all duration-300"
+                                 :class="{ 'text-gray-600': tabSelected !== index }"></div>
+                        </button>
+                    </template>
+                </div>
+                <div class="absolute top-0 w-full h-0.5 bg-gray-600"></div>
+                <div x-ref="tabMarker"
+                     class="absolute top-0 h-0.5 bg-white transition-all duration-300"></div>
+            </div>
+            <div x-data="autocomplete"
+                 x-resize="searchWidth = $width"
+                 :style="`left: ${tabsWidth - searchWidth - 24}px`"
+                 class="absolute top-0 flex rounded-md border-1 border-gray-600 bg-gray-900 w-min h-8">
+                <input type="text"
+                       x-model="query"
+                       @input.debounce.300ms="fetchLocations"
+                       @focus="showSuggestions"
+                       @blur="hideSuggestions"
+                       @keyup.arrow-down="highlightNext"
+                       @keyup.arrow-up="highlightPrevious"
+                       @keyup.enter.prevent="selectLocation"
+                       :placeholder="`${data.city}, ${data.country}`"
+                       class="outline-none flex-grow px-2 w-0" />
+                <img src="static/assets/icons/magnifier.svg" alt="" class="h-4 m-2" />
+            </div>
+        </div>
+    </div>
+</div>
