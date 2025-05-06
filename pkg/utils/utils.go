@@ -5,21 +5,22 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
 	"github.com/goccy/go-json"
+	"github.com/valyala/fasthttp"
 )
 
 func Convert[T any](val string, result *T) error {
 	switch any(result).(type) {
+	// convert to string
 	case *string:
 		*result = any(val).(T)
 		return nil
+	// convert to int
 	case *int:
-		// Conversion to int (example)
 		var temp int
 		_, err := fmt.Sscanf(val, "%d", &temp)
 		if err == nil {
@@ -88,17 +89,16 @@ func FetchJSON[T any](endpoint string, paths []string, queries url.Values) (T, e
 		endpoint = fmt.Sprintf("%s?%s", endpoint, queries.Encode())
 	}
 
-	resp, err := http.Get(endpoint)
+	statusCode, resp, err := fasthttp.Get(nil, endpoint)
 	if err != nil {
 		return result, fmt.Errorf("error making request: %w", err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return result, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	if statusCode != fasthttp.StatusOK {
+		return result, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	err = json.Unmarshal(resp, &result)
 	if err != nil {
 		return result, fmt.Errorf("error decoding JSON: %w", err)
 	}
