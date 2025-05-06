@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 var (
@@ -26,13 +27,16 @@ func NewApp() *fiber.App {
 		JSONDecoder: json.Unmarshal,
 	})
 
+	app.Use(logger.New())
 	app.Use(compress.New())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: ALLOWED_ORIGINS,
 	}))
+
 	app.Static("/static", "./static")
 
 	redis.Init()
+
 	routes.TemplateRoutes(app)
 	routes.PublicRoutes(app)
 	routes.SwaggerRoute(app)
