@@ -7,45 +7,43 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
+	"github.com/KananHasanov747/gofiber_weather_app/app/models"
+	"github.com/biter777/countries"
 	"github.com/goccy/go-json"
 	"github.com/valyala/fasthttp"
 )
 
-func Convert[T any](val string, result *T) error {
-	switch any(result).(type) {
-	// convert to string
-	case *string:
-		*result = any(val).(T)
-		return nil
-	// convert to int
-	case *int:
-		var temp int
-		_, err := fmt.Sscanf(val, "%d", &temp)
-		if err == nil {
-			*result = any(temp).(T)
-		}
-		return err
-	default:
-		return fmt.Errorf("unsupported type: %T", result)
-	}
-}
-
-func Show[T any](key string, def T) T {
+// Safely retrieve the value from .env in right format
+func Show[T string | int | bool](key string, _default T) T {
 	val, ok := os.LookupEnv(key)
-	if ok {
-		var result T
-		if err := Convert(val, &result); err == nil {
-			return result
-		}
+	if !ok {
+		return _default
 	}
-	return def
-}
 
-func PathExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
+	var result any
+	switch any(_default).(type) {
+	case string:
+		result = val
+	case int:
+		parsed, err := strconv.Atoi(val)
+		if err != nil {
+			return _default
+		}
+		result = parsed
+	case bool:
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return _default
+		}
+		result = parsed
+	default:
+		return _default
+	}
+
+	return result.(T)
 }
 
 func GzipCompress(data []byte) ([]byte, error) {
@@ -104,4 +102,33 @@ func FetchJSON[T any](endpoint string, paths []string, queries url.Values) (T, e
 	}
 
 	return result, nil
+}
+
+func GetLocation(ip string) (map[string]string, error) {
+	var result models.Location
+
+	statusCode, resp, err := fasthttp.Get(nil, fmt.Sprintf("https://ipinfo.io/%s/json", ip))
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+
+	if statusCode != fasthttp.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
+	}
+
+	err = json.Unmarshal(resp, &result)
+
+	// Check if the result is empty
+	if result == (models.Location{}) {
+		return nil, fmt.Errorf("fething error")
+	}
+
+	loc := strings.Split(result.Loc, ",")
+	return map[string]string{
+		"city":      result.City,
+		"country":   countries.ByName(result.Country).String(),
+		"latitude":  loc[0],
+		"longitude": loc[1],
+	}, nil
 }

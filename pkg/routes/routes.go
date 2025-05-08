@@ -24,7 +24,16 @@ func PublicRoutes(a *fiber.App) {
 
 func TemplateRoutes(route *fiber.App) {
 	route.Get("/", func(c *fiber.Ctx) error {
-		raw, _ := services.GetWeatherData("Baku", "Azerbaijan", "40.37767", "49.89201")
+		var city, country, lat, lon string
+		loc, err := utils.GetLocation(c.IP())
+
+		if err != nil {
+			city, country, lat, lon = "Baku", "Azerbaijan", "40.37767", "49.89201"
+		} else {
+			city, country, lat, lon = loc["city"], loc["country"], loc["latitude"], loc["longitude"]
+		}
+
+		raw, _ := services.GetWeatherData(city, country, lat, lon)
 		data, _ := utils.GzipDecompress(raw)
 
 		return c.Render("index", fiber.Map{"data": data})
