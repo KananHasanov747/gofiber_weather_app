@@ -1,35 +1,53 @@
 package openmeteo
 
-import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
+func Icons(w_code, is_day int) string {
+	// meteocons:
+	// 0	        Clear sky (clear-day-fill, clear-night-fill)
+	// 1, 2, 3     Mainly clear, partly cloudy, and overcast () (partly-cloudy-day, partly-cloudy-night) (overcast-day, overcast-night)
+	// 45, 48	    Fog and depositing rime fog (fog-day-fill, fog-night-fill) ()
+	// 51, 53, 55	Drizzle: Light, moderate, and dense intensity (drizzle-fill) () (extreme-day-drizzle-fill, extreme-night-drizzle-fill)
+	// 56, 57	    Freezing Drizzle: Light and dense intensity
+	// 61, 63, 65	Rain: Slight, moderate and heavy intensity
+	// 66, 67	    Freezing Rain: Light and heavy intensity
+	// 71, 73, 75	Snow fall: Slight, moderate, and heavy intensity
+	// 77	        Snow grains
+	// 80, 81, 82	Rain showers: Slight, moderate, and violent
+	// 85, 86	    Snow showers slight and heavy
+	// 95 *	    Thunderstorm: Slight or moderate
+	// 96, 99 *	Thunderstorm with slight and heavy hail
 
-	"github.com/KananHasanov747/gofiber_weather_app/app/models"
-)
-
-func FetchAPI[T models.SearchResponse | models.WeatherResponse](endpoint string, params url.Values) (T, error) {
-	var result T
-
-	resp, err := http.Get(endpoint + "?" + params.Encode())
-	if err != nil {
-		return result, fmt.Errorf("http.Get error: %w", err)
+	icons := map[int][]string{
+		0:  {"clear_night_fill", "clear_day_fill"},
+		1:  {"", ""},
+		2:  {"partly_cloudy_night", "partly_cloudy_day"},
+		3:  {"overcast_night", "overcast_day"},
+		45: {"", ""},
+		48: {"", ""},
+		51: {"", ""},
+		53: {"", ""},
+		55: {"", ""},
+		56: {"", ""},
+		57: {"", ""},
+		61: {"", ""},
+		63: {"", ""},
+		65: {"", ""},
+		66: {"", ""},
+		67: {"", ""},
+		71: {"", ""},
+		73: {"", ""},
+		75: {"", ""},
+		77: {"", ""},
+		80: {"", ""},
+		81: {"", ""},
+		82: {"", ""},
+		85: {"", ""},
+		86: {"", ""},
+		95: {"", ""},
+		96: {"", ""},
+		99: {"", ""},
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return result, fmt.Errorf("non-200: %d – %s", resp.StatusCode, string(body))
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return result, err
-	}
-
-	return result, err
+	return icons[w_code][is_day]
 }
 
 // daily := {

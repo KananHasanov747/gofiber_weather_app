@@ -29,6 +29,7 @@ type Current struct {
 
 type Hourly struct {
 	Apparent_temperature      []float32 `json:"apparent_temperature"`
+	Is_day                    []int     `json:"is_day"`
 	Icon_url                  []string  `json:"icon_url"`
 	Description               []string  `json:"description"`
 	Precipitation_probability []int     `json:"precipitation_probability"`
@@ -45,9 +46,8 @@ type Daily struct {
 	Temperature_2m_min []float32 `json:"temperature_2m_min"`
 	Day_of_week        []string  `json:"day_of_week"`
 	Time               []string  `json:"time"`
-	Is_day             []int     `json:"is_day"`
 	Icon_url           []string  `json:"icon_url"`
-	Desription         []string  `json:"description"`
+	Description        []string  `json:"description"`
 	Uv_index_max       []float32 `json:"uv_index_max"`
 	Weather_code       []int     `json:"weather_code"`
 }
