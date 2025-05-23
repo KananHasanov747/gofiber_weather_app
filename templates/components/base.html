@@ -1,5 +1,4 @@
-<div x-data="{ data: {} }"
-     x-init="$store.data = {{ .data }}; data = $store.data; $watch('$store.data', value => data = value);"
+<div x-data="{ data: {{ .data }} }"
      class="flex flex-col min-h-dvh text-gray-300">
     <div class="px-6 pt-4">
         <div class="flex flex-col items-center">
@@ -71,7 +70,7 @@
                 </div>
             </div>
         </div>
-        <div x-data="{ tabsWidth: 0 }"
+        <div x-data="{ tabsWidth: 0, padding: 0, init() { const cs = getComputedStyle(this.$el); this.padding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight); } }"
              x-resize="tabsWidth = $el.clientWidth"
              class="relative p-6 pt-0">
             <div class="relative w-min overflow-x-hidden">
@@ -91,22 +90,7 @@
                 <div x-ref="tabMarker"
                      class="absolute top-0 h-0.5 bg-white transition-all duration-300"></div>
             </div>
-            <div x-data="autocomplete"
-                 x-resize="searchWidth = $width"
-                 :style="`left: ${tabsWidth - searchWidth - 24}px`"
-                 class="absolute top-0 flex rounded-md border-1 border-gray-600 bg-gray-900 w-min h-8">
-                <input type="text"
-                       x-model="query"
-                       @input.debounce.300ms="fetchLocations"
-                       @focus="showSuggestions"
-                       @blur="hideSuggestions"
-                       @keyup.arrow-down="highlightNext"
-                       @keyup.arrow-up="highlightPrevious"
-                       @keyup.enter.prevent="selectLocation"
-                       :placeholder="`${data.city}, ${data.country}`"
-                       class="outline-none flex-grow px-2 w-0" />
-                <img src="static/assets/icons/magnifier.svg" alt="" class="h-4 m-2" />
-            </div>
+            {{ template "components/search" . }}
         </div>
     </div>
 </div>

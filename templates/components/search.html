@@ -1,0 +1,32 @@
+<div x-data="autocomplete"
+     class="absolute top-0 flex bg-gray-900 right-6 h-8">
+    <div :class="{ 'rounded-t-none border-t-transparent': locations.length }"
+         class="absolute top-0 w-full h-full rounded-md border-1 border-gray-600 bg-gray-900 z-20"></div>
+    <div class="absolute top-0 right-0 w-8 h-8 z-25"
+         @click="expanded = !expanded"></div>
+    <input type="text"
+           x-model="query"
+           @input.debounce.300ms="fetchLocations"
+           @focus="showSuggestions"
+           @blur="hideSuggestions"
+           @keyup.arrow-down="highlightNext"
+           @keyup.arrow-up="highlightPrevious"
+           @keyup.enter.prevent="selectLocation"
+           placeholder="Type the city"
+           :style="expanded ? `width: ${tabsWidth - padding - $el.parentElement.clientWidth}px; transition: all 0.2s ease-in-out; padding-left: .5rem;` : 'width: 0px; transition: all 0.2s ease-in-out; padding-left: 0rem;'"
+           class="outline-none flex-grow z-20" />
+    <img src="static/assets/icons/magnifier.svg" alt="" class="h-4 m-2" />
+    <div class="absolute bottom-0 left-0 pb-7.5 rounded-md border-1 border-gray-600 w-full max-h-[254px] z-10 overflow-scroll">
+        <template x-for="(location, index) in locations" :key="index">
+            <div class="flex items-center py-2 bg-gray-900"
+                 :class="{ 'bg-gray-500!': index === highlightedIndex }"
+                 @mousedown="selectLocation">
+                <img src="static/assets/icons/location.svg" alt="" class="h-6 m-1" />
+                <div class="flex flex-col">
+                    <span x-text="location.name" class="text-xs"></span>
+                    <span x-text="location.country" class="text-md"></span>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>

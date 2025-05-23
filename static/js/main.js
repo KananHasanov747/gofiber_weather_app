@@ -1,13 +1,16 @@
 document.addEventListener("alpine:init", () => {
   Alpine.data("autocomplete", () => ({
-    searchWidth: 0,
+    version: "1",
+    searchAPI: "search",
+    weatherAPI: "weather",
+    expanded: false,
     query: "",
     locations: [],
     highlightedIndex: 0,
     index: null,
     get fetchLocations() {
       if (this.query.length > 0) {
-        fetch(`${searchAPI}?q=${this.query}`)
+        fetch(`api/v${this.version}/${this.searchAPI}/${this.query}`)
           .then((response) => response.text())
           .then((list) => {
             this.locations = JSON.parse(list);
@@ -30,9 +33,9 @@ document.addEventListener("alpine:init", () => {
       } else {
         this.highlightedIndex = 0;
       }
-      this.$refs.suggestionsContainer.children[
-        this.highlightedIndex
-      ].scrollIntoView({ block: "nearest" });
+      //this.$refs.suggestionsContainer.children[
+      //  this.highlightedIndex
+      //].scrollIntoView({ block: "nearest" });
     },
     get highlightPrevious() {
       if (this.highlightedIndex > 0) {
@@ -40,18 +43,18 @@ document.addEventListener("alpine:init", () => {
       } else {
         this.highlightedIndex = this.locations.length - 1;
       }
-      this.$refs.suggestionsContainer.children[
-        this.highlightedIndex
-      ].scrollIntoView({ block: "nearest" });
+      //this.$refs.suggestionsContainer.children[
+      //  this.highlightedIndex
+      //].scrollIntoView({ block: "nearest" });
     },
     // Send the response to the backend and retrieve an updated data
     get selectLocation() {
       const defaultSelected =
         this.locations[this.index ?? this.highlightedIndex];
-      const selectedCity = defaultSelected.city;
+      const selectedCity = defaultSelected.name;
       const selectedCountry = defaultSelected.country;
-      const selectedLatitude = defaultSelected.lat;
-      const selectedLongitude = defaultSelected.lon;
+      const selectedLatitude = defaultSelected.latitude;
+      const selectedLongitude = defaultSelected.longitude;
 
       if (selectedCity && selectedCountry) {
         // Use cookies to set the values unchanged after reload
@@ -67,18 +70,15 @@ document.addEventListener("alpine:init", () => {
           "lon=" + selectedLongitude + "; expires=" + expires.toUTCString();
 
         window.history.pushState({}, "", this.url);
-        htmx.ajax("GET", weatherAPI, {
-          values: {
-            city: selectedCity,
-            country: selectedCountry,
-            lat: selectedLatitude,
-            lon: selectedLongitude,
+        htmx.ajax(
+          "GET",
+          `api/v${this.version}/${this.weatherAPI}/${selectedCity}/${selectedCountry}/${selectedLatitude}/${selectedLongitude}`,
+          {
+            handler: (_, response) => {
+              this.data = JSON.parse(response.xhr.responseText);
+            },
           },
-          handler: (elt, response) => {
-            const data = JSON.parse(response.xhr.responseText);
-            Alpine.store("data", data);
-          },
-        });
+        );
         this.query = "";
         this.locations = [];
       }
